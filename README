@@ -1,0 +1,17 @@
+To run:
+	g++ satsolver.cpp
+	./a.out < ./Benchmarks/filename.cnf
+
+	Note:
+	File names starting with "uf" are solvable.
+	File names starting with "uuf" are unsolvable.
+
+Output:
+	The variable assignment for any satisfiable solutions found.
+	Average time and clauses solved by WalkSat and local search over 10 trials.
+	% of trials for which satisfiable solutions were found.
+
+Makefile sample commands:
+	make run-#: run a .cnf file with # variables
+	make run-hard: run one of the "hard" cnf files (100 variables, 400+ clauses)
+	make run-unsolvable: run an unsolvable cnf file
