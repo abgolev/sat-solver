@@ -83,14 +83,23 @@ void printSolution(int vnum, int cnum, int mat[][3], int var[], int truthmat[][3
 /*
 For random clause, flip the bit that makes the most clauses be good
 Resetting the truth matrix could be made more efficient here
+Input: 
+	v is number of variables
+	c is number of clauses
+	matrix contains each clause as a row and the three variables of each clause as columns
+	vars is the assignments of variables as a 0 or 1
 Output: Maximum number of clauses that are True
 */
 int walkSat(int v, int c, int matrix[][3], int vars[]){
-	//int vars[v]; //the list of variables and their values (0 or 1)
 	int m[c][3]; //the truth matrix	
 	int var;
 
 	vector<int> varLocations;
+
+	//cout<<"List of vars here:"<<endl;
+	//for(int i=0; i<v; i++){
+	//	cout<<vars[i+1]<<endl;
+	//}
 
 	//setting the truth matrix
 	for(int i=0; i<c; i++){
@@ -249,6 +258,60 @@ int localSearch(int v, int c, int matrix[][3], int vars[]){
 	return prevCorrect;
 }
 
+/*
+isItLiteral:
+	-2 means no
+	-1 means yes, all negated
+	0 means we dont know
+	1 means yes, all positive
+*/
+
+vector<int> pureLiteralCheck(int vars, int columns, int m[][3]){
+	vector<int> literals;
+	int isItLiteral[vars+1];
+	int thisVar, sign;
+	for(int i=0; i<=vars+1; i++)
+		isItLiteral[i]=0;
+
+	for(int i=0; i<columns; i++){
+		for(int j=0; j<3; j++){
+			thisVar = abs(m[i][j]);
+			sign = (thisVar>0);	
+			if(isItLiteral[thisVar]==0)
+				isItLiteral[thisVar] = sign;
+			else if(isItLiteral[thisVar]==-1){
+				if(sign>0)
+					isItLiteral[thisVar]=-2;
+				else
+					isItLiteral[thisVar]=-1;
+			}
+			else if(isItLiteral[abs(thisVar)]==1){
+				if(sign>0)
+					isItLiteral[thisVar]=1;
+				else
+					isItLiteral[thisVar]=-2;
+			}
+		}
+	}
+
+	for(int i=0; i<=vars+1; i++)
+		if(isItLiteral[i]==-1 || isItLiteral[i]==1)
+			literals.push_back(i*isItLiteral[i]);
+	
+	return literals;
+}
+
+int DPLL(int v, int c, int matrix[][3], int vars[]){
+	//pure literal check
+	vector<int> pureLiterals;
+	pureLiteralCheck(v, c, matrix);
+	//loop
+	//unit clause setting
+	//check for fail/success
+
+	//splitter
+}
+
 int main(){
 	string line;
 	string firstVal = "";
@@ -301,14 +364,15 @@ int main(){
 		if(line[0]==' ')
 			firstChar=1;
 
-		//Parsing the file
+		//Parsing the file 
+		//Making varMatrix[clause][variable]
 		for(int i=firstChar; i<line.length(); i++){
 			if(counter==3)
 				break;
 
 			if(line[i]==' '){
 				newVarInt=stoi(newVar);	
-				varMatrix[count][counter]=newVarInt;
+				varMatrix[count][counter]=newVarInt;  //count is clause #; counter is var position in clause
 				newVar="";	
 				counter=counter+1;
 				}
@@ -328,7 +392,9 @@ int main(){
 	double sumTimeWalkSat = 0;
 	double propSolvedWalkSat = 0;
 
-	int vars[nvar]; //the list of variables
+	int vars[nvar+1]; //the list of variables (+1 because we start at 0 but we don't use it)
+
+	DPLL(nvar, nclause, varMatrix, vars);
 
 	for(int i=0; i<10; i++){
 		cout<<endl<<"Trial #"<<i<<endl;
