@@ -15,6 +15,8 @@ g++ satsolver.cpp
 using namespace std;
 
 int MAX_RUNS = 10000;
+int varCount, clauseCount;
+vector< vector<int> > allClauses;
 
 //Prints out two-dimensional array
 void printMatrix(int c, int matrix[][3]){
@@ -258,6 +260,7 @@ int localSearch(int v, int c, int matrix[][3], int vars[]){
 	return prevCorrect;
 }
 
+
 /*
 isItLiteral:
 	-2 means no
@@ -265,15 +268,14 @@ isItLiteral:
 	0 means we dont know
 	1 means yes, all positive
 */
-
-vector<int> pureLiteralCheck(int vars, int columns, int m[][3]){
+vector<int> pureLiteralCheck(int m[][3]){
 	vector<int> literals;
-	int isItLiteral[vars+1];
+	int isItLiteral[varCount+1];
 	int thisVar, sign;
-	for(int i=0; i<=vars+1; i++)
+	for(int i=0; i<=varCount+1; i++)
 		isItLiteral[i]=0;
 
-	for(int i=0; i<columns; i++){
+	for(int i=0; i<clauseCount; i++){
 		for(int j=0; j<3; j++){
 			thisVar = abs(m[i][j]);
 			sign = (thisVar>0);	
@@ -294,22 +296,89 @@ vector<int> pureLiteralCheck(int vars, int columns, int m[][3]){
 		}
 	}
 
-	for(int i=0; i<=vars+1; i++)
+	for(int i=0; i<=varCount+1; i++)
 		if(isItLiteral[i]==-1 || isItLiteral[i]==1)
 			literals.push_back(i*isItLiteral[i]);
 	
 	return literals;
 }
 
-int DPLL(int v, int c, int matrix[][3], int vars[]){
-	//pure literal check
-	vector<int> pureLiterals;
-	pureLiteralCheck(v, c, matrix);
-	//loop
+//Returns 1 if DPLL fails; 0 if it does not
+int dpllFail(int v[], int m[][3]){
+	int sign[3];
+	for(int i=0; i<clauseCount; i++){
+		for(int j=0; j<3; j++){
+			if(m[i][j]>0)
+				sign[j] = 1;
+			else
+				sign[j] = 0;
+		}
+		if(v[abs(m[i][0])]==-1 || v[abs(m[i][1])]==-1 || v[abs(m[i][2])]==-1)
+			break;
+		if(v[abs(m[i][0])]!=sign[0] && v[abs(m[i][1])]!=sign[1] && v[abs(m[i][2])]!=sign[2])
+			return 1;
+	}
+	return 0;
+}
+
+//Returns 1 if DPLL succeeeds; 0 if it does not
+int dpllSuccess(int v[], int m[][3]){
+	int sign[3];
+	for(int i=0; i<clauseCount; i++){
+		for(int j=0; j<3; j++){
+			if(m[i][j]>0)
+				sign[j] = 1;
+			else
+				sign[j] = 0;
+		}
+		if(v[abs(m[i][0])]!=sign[0] && v[abs(m[i][1])]!=sign[1] && v[abs(m[i][2])]!=sign[2])
+			return 0;
+	}
+	return 1;
+}
+
+int dpllRecursive(int v[]){
 	//unit clause setting
 	//check for fail/success
-
 	//splitter
+	return 0;
+}
+
+/*
+Inside vars[]:
+	1 means true
+	0 means false
+	-1 means not set
+*/
+int DPLL(int vars[], int matrix[][3]){
+	//pure literal check
+	vector<int> pureLiterals;
+
+	pureLiterals = pureLiteralCheck(matrix);
+	for(int i = 0; i<pureLiterals.size(); i++){
+		if(pureLiterals[i]>0)
+			vars[pureLiterals[i]]=1;
+		else
+			vars[abs(pureLiterals[i])]=0;
+	}
+
+	if(dpllFail(vars, matrix))
+		return 0;
+
+	if(dpllSuccess(vars, matrix))
+		return 1;
+
+	for(int i=0; i<clauseCount; i++){
+		vector<int> varTriplet;
+		varTriplet[0]=matrix[i][0];
+		varTriplet[1]=matrix[i][1];
+		varTriplet[2]=matrix[i][2];
+		allClauses.push_back(varTriplet);
+	}
+
+	return dpllRecursive(vars);
+
+	//loop
 }
 
 int main(){
@@ -348,7 +417,7 @@ int main(){
 	}
 
 	int count=0;
-	int varMatrix[nclause][3];	
+	int clauseMatrix[nclause][3];	
 
 	while(getline(cin,line)){
 		if(count>nclause)
@@ -365,14 +434,14 @@ int main(){
 			firstChar=1;
 
 		//Parsing the file 
-		//Making varMatrix[clause][variable]
+		//Making clauseMatrix[clause][variable]
 		for(int i=firstChar; i<line.length(); i++){
 			if(counter==3)
 				break;
 
 			if(line[i]==' '){
 				newVarInt=stoi(newVar);	
-				varMatrix[count][counter]=newVarInt;  //count is clause #; counter is var position in clause
+				clauseMatrix[count][counter]=newVarInt;  //count is clause #; counter is var position in clause
 				newVar="";	
 				counter=counter+1;
 				}
@@ -394,7 +463,10 @@ int main(){
 
 	int vars[nvar+1]; //the list of variables (+1 because we start at 0 but we don't use it)
 
-	DPLL(nvar, nclause, varMatrix, vars);
+	varCount = nvar;
+	clauseCount = nclause;
+
+	DPLL(vars, clauseMatrix);
 
 	for(int i=0; i<10; i++){
 		cout<<endl<<"Trial #"<<i<<endl;
@@ -404,14 +476,14 @@ int main(){
 			vars[i]=rand()%2;
 
 		start = clock();
-		maxSolve = localSearch(nvar, nclause, varMatrix, vars);
+		maxSolve = localSearch(nvar, nclause, clauseMatrix, vars);
 		duration = (clock() - start) / (double) CLOCKS_PER_SEC;
 		sumSolvedLocal += maxSolve;
 		sumTimeLocal += duration;
 		propSolvedLocal += (maxSolve==nclause);
 
 		start2 = clock();
-		maxSolve2 = walkSat(nvar, nclause, varMatrix, vars);
+		maxSolve2 = walkSat(nvar, nclause, clauseMatrix, vars);
 		duration2 = (clock() - start2) / (double) CLOCKS_PER_SEC;
 		sumSolvedWalkSat += maxSolve2;
 		sumTimeWalkSat += duration2;
