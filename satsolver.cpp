@@ -11,12 +11,14 @@ g++ satsolver.cpp
 #include <ctime>	//srand()
 #include <time.h>	//timer
 #include <vector>
+#include <queue>
 
 using namespace std;
 
 int MAX_RUNS = 10000;
 int varCount, clauseCount;
 vector< vector<int> > allClauses;
+queue<int> splitVarSelect; //for DPLL choice selection
 
 //Prints out two-dimensional array
 void printMatrix(int c, int matrix[][3]){
@@ -167,8 +169,14 @@ int walkSat(int v, int c, int matrix[][3], int vars[]){
 	return prevCorrect;
 }
 
-//Local Search flips a random variable and keeps if flipped if this causes and improvement
-//Returns # of clauses correct after final variable assignment
+/*
+Local Search flips a random variable and keeps if flipped if this causes and improvement
+Input:  v is # of variables
+	c is # of clauses
+	matrix is the clauses in CNF form
+	vars is an array containing whether each variable is T or F 
+Output: # of clauses correct after final variable assignment
+*/
 int localSearch(int v, int c, int matrix[][3], int vars[]){
 	int m[c][3]; //the truth matrix	
 	int var; //which variable in the var list
@@ -260,47 +268,50 @@ int localSearch(int v, int c, int matrix[][3], int vars[]){
 	return prevCorrect;
 }
 
-
 /*
-isItLiteral:
-	-2 means no
+isPure:
+	-2 means we don't know
 	-1 means yes, all negated
-	0 means we dont know
+	0 means no
 	1 means yes, all positive
 */
 vector<int> pureLiteralCheck(int m[][3]){
-	vector<int> literals;
-	int isItLiteral[varCount+1];
+	vector<int> pureLits;
+	int isPure[varCount+1];
 	int thisVar, sign;
+
+
 	for(int i=0; i<=varCount+1; i++)
-		isItLiteral[i]=0;
+		isPure[i]=-2;
 
 	for(int i=0; i<clauseCount; i++){
 		for(int j=0; j<3; j++){
 			thisVar = abs(m[i][j]);
-			sign = (thisVar>0);	
-			if(isItLiteral[thisVar]==0)
-				isItLiteral[thisVar] = sign;
-			else if(isItLiteral[thisVar]==-1){
+			sign = m[i][j]>0;	
+			if(isPure[thisVar]==0)
+				; //we already know it's not pure
+			else if(isPure[thisVar]==-2)
+				isPure[thisVar] = sign;
+			else if(isPure[thisVar]==-1){
 				if(sign>0)
-					isItLiteral[thisVar]=-2;
+					isPure[thisVar]=0;
 				else
-					isItLiteral[thisVar]=-1;
+					isPure[thisVar]=-1;
 			}
-			else if(isItLiteral[abs(thisVar)]==1){
+			else if(isPure[abs(thisVar)]==1){
 				if(sign>0)
-					isItLiteral[thisVar]=1;
+					isPure[thisVar]=1;
 				else
-					isItLiteral[thisVar]=-2;
+					isPure[thisVar]=0;
 			}
 		}
 	}
 
 	for(int i=0; i<=varCount+1; i++)
-		if(isItLiteral[i]==-1 || isItLiteral[i]==1)
-			literals.push_back(i*isItLiteral[i]);
+		if(isPure[i]==-1 || isPure[i]==1)
+			pureLits.push_back(i*isPure[i]);
 	
-	return literals;
+	return pureLits;
 }
 
 //Returns 1 if DPLL fails; 0 if it does not
@@ -337,18 +348,85 @@ int dpllSuccess(int v[], int m[][3]){
 	return 1;
 }
 
+//Returns 1 if variable in clause is True, 0 if not
+int isTrue(int v, int s){
+	if((v==1 && s) || (v==0 && !s))
+		return 1;
+	else
+		return 0;
+}
+
+//Returns 1 if variable in clause is False, 0 if not
+int isFalse(int v, int s){
+	if((v==1 && !s) || (v==0 && s))
+		return 1;
+	else
+		return 0;
+}
+
+//queue splitVarSelect
+//vector vector int allClauses
 int dpllRecursive(int v[]){
-	//unit clause setting
-	//check for fail/success
-	//splitter
+
+	//Setting unit clauses
+	int var1, var2, var3, sign1, sign2, sign3;
+	for(int i=0; i<clauseCount; i++){
+		var1 = v[allClauses[i][0]];
+		var2 = v[allClauses[i][1]];
+		var3 = v[allClauses[i][2]];
+		sign1 = allClauses[i][0] > 0;
+		sign2 = allClauses[i][1] > 0;
+		sign3 = allClauses[i][2] > 0;
+		if(isTrue(var1,sign1) || isTrue(var2,sign2) || isTrue(var3, sign3))
+			;
+		else if(isFalse(var1, sign1) && isFalse(var2, sign2) && var3==-1){
+			if(allClauses[i][2]>0)
+				v[var1] = 1;
+			else
+				v[abs(var1)] = 0;				
+		}		
+		else if(isFalse(var1, sign1) && var2==-1 && isFalse(var3, sign3)){ 
+			if(allClauses[i][2]>0)
+				v[var2] = 1;
+			else
+				v[abs(var2)] = 0;						
+				
+		}	
+		else if(var1==-1 && isFalse(var2, sign2) && isFalse(var3, sign3)){ 
+			if(allClauses[i][2]>0)
+				v[var3] = 1;
+			else
+				v[abs(var3)] = 0;						
+		}	
+	}
+
+	//These need to work with the vector of vector ints
+//	if(dpllFail(vars, matrix))
+//		return 0;
+
+//	if(dpllSuccess(vars, matrix))
+//		return 1;
+
+	int varToChange = -1;
+	varToChange = splitVarSelect.front();
+	splitVarSelect.pop();
+
+	if(varToChange==-1){
+		cout<<"No var to change"<<endl;
+		return 0;
+	}
+	else{
+		//splitter
+	}		
+
 	return 0;
 }
 
 /*
 Inside vars[]:
-	1 means true
-	0 means false
 	-1 means not set
+	0 means false
+	1 means true
 */
 int DPLL(int vars[], int matrix[][3]){
 	//pure literal check
@@ -368,12 +446,60 @@ int DPLL(int vars[], int matrix[][3]){
 	if(dpllSuccess(vars, matrix))
 		return 1;
 
+
+	int positiveVar[varCount+1];
+	int totalVar[varCount+1];
+
+	for(int i=0; i<=varCount; i++){
+		positiveVar[i]=0;
+		totalVar[i]=0;
+	}
+
+	//populating global vector<vector<int> > allClauses for dpllRecursive to use
 	for(int i=0; i<clauseCount; i++){
 		vector<int> varTriplet;
-		varTriplet[0]=matrix[i][0];
-		varTriplet[1]=matrix[i][1];
-		varTriplet[2]=matrix[i][2];
+
+		for(int j=0; j<3; j++){
+			varTriplet[j]=matrix[i][j];
+
+			//Setting positiveVar and totalVar, used to determine order of variable assignment
+			if(matrix[i][j]>0){
+				positiveVar[matrix[i][j]]+=1;
+				totalVar[matrix[i][j]]+=1;
+			}
+			else
+				totalVar[abs(matrix[i][j])]+=1;				
+		}		
+
 		allClauses.push_back(varTriplet);
+	}
+
+	float positiveVarRatio[varCount+1];
+
+	for(int i=1; i<=varCount; i++){
+		if(totalVar[i]==0)
+			positiveVarRatio[i] = -1;
+		else
+			positiveVarRatio[i] = 1.0*positiveVar[i]/totalVar[i];
+	}	
+
+	int maxVal=-1;
+	int maxIndex=-1;
+	for(int i=1; i<varCount; i++){
+		for(int j=1; j<=varCount; j++){
+			if(maxVal<positiveVarRatio[j]){
+				maxVal = positiveVarRatio[j];
+				maxIndex = j;
+			}
+		}
+		if(maxVal==-1)
+			break;
+		else{
+			splitVarSelect.push(maxIndex);
+			positiveVarRatio[maxIndex]=-2;
+		}
+		maxVal=-1;
+		maxIndex=-1;
 	}
 
 	return dpllRecursive(vars);
