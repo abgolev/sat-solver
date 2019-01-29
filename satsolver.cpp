@@ -432,23 +432,34 @@ int dpllRecursive(int v[]){
 		if(isTrue(var1,sign1) || isTrue(var2,sign2) || isTrue(var3, sign3))
 			;
 		else if(isFalse(var1, sign1) && isFalse(var2, sign2) && var3==-1){
-			if(allClauses[i][2]>0)
-				v[var1] = 1;
-			else
-				v[abs(var1)] = 0;				
+			if(allClauses[i][2]>0){
+				v[var3] = 1;
+				cout<<"unitClause A"<<endl;
+				}
+			else{
+				cout<<"unitClause B"<<endl;
+				v[abs(var3)] = 0;
+			}				
 		}		
 		else if(isFalse(var1, sign1) && var2==-1 && isFalse(var3, sign3)){ 
-			if(allClauses[i][2]>0)
+			if(allClauses[i][2]>0){
+				cout<<"unitClause C"<<endl;
 				v[var2] = 1;
-			else
+			}
+			else{
+				cout<<"unitClause D"<<endl;
 				v[abs(var2)] = 0;						
-				
+			}	
 		}	
 		else if(var1==-1 && isFalse(var2, sign2) && isFalse(var3, sign3)){ 
-			if(allClauses[i][2]>0)
-				v[var3] = 1;
-			else
-				v[abs(var3)] = 0;						
+			if(allClauses[i][2]>0){
+				cout<<"unitClause E"<<endl;
+				v[var1] = 1;
+			}
+			else{
+				cout<<"unitClause F"<<endl;
+				v[abs(var1)] = 0;
+			}						
 		}
 		else	
 			;
