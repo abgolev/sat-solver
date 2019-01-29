@@ -7,6 +7,9 @@ run-3:
 run-6:
 	./a.out < ./Benchmarks/test.cnf
 
+run-impossible:
+	./a.out < ./Benchmarks/test3.cnf
+
 run-20: 
 	./a.out < ./Benchmarks/CNFFormulae/uf20-0156.cnf
 

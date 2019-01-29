@@ -365,9 +365,12 @@ int dpllRecursiveFail(int v[]){
 		}
 		if(v[abs(allClauses[i][0])]==-1 || v[abs(allClauses[i][1])]==-1 || v[abs(allClauses[i][2])]==-1)
 			break;
-		if(v[abs(allClauses[i][0])]!=sign[0] && v[abs(allClauses[i][1])]!=sign[1] && v[abs(allClauses[i][2])]!=sign[2])
+		if(v[abs(allClauses[i][0])]!=sign[0] && v[abs(allClauses[i][1])]!=sign[1] && v[abs(allClauses[i][2])]!=sign[2]){
+			cout<<"Recursive Fail: True"<<endl;
 			return 1;
+		}
 	}
+	cout<<"Recursive Fail: False"<<endl;
 	return 0;
 }
 
@@ -381,9 +384,12 @@ int dpllRecursiveSuccess(int v[]){
 			else
 				sign[j] = 0;
 		}
-		if(v[abs(allClauses[i][0])]!=sign[0] && v[abs(allClauses[i][1])]!=sign[1] && v[abs(allClauses[i][2])]!=sign[2])
+		if(v[abs(allClauses[i][0])]!=sign[0] && v[abs(allClauses[i][1])]!=sign[1] && v[abs(allClauses[i][2])]!=sign[2]){
+			cout<<"Recursive Success: False."<<endl;
 			return 0;
+		}
 	}
+	cout<<"Recursive Success: True."<<endl;
 	return 1;
 }
 //Returns 1 if variable in clause is True, 0 if not
@@ -406,9 +412,9 @@ int isFalse(int v, int s){
 //vector vector int allClauses
 int dpllRecursive(int v[]){
 
-	cout<<"MEOWWW6"<<endl;
+//	cout<<"MEOWWW6"<<endl;
 
-	for(int i = 0; i<=varCount; i++){
+	for(int i = 1; i<=varCount; i++){
 		cout<<"Element "<<i<<": "<<v[i]<<endl;
 	}
 
@@ -416,6 +422,7 @@ int dpllRecursive(int v[]){
 	//Setting unit clauses
 	int var1, var2, var3, sign1, sign2, sign3;
 	for(int i=0; i<clauseCount; i++){
+		//cout<<"Unit Clauses"<<endl;
 		var1 = v[allClauses[i][0]];
 		var2 = v[allClauses[i][1]];
 		var3 = v[allClauses[i][2]];
@@ -444,66 +451,77 @@ int dpllRecursive(int v[]){
 				v[abs(var3)] = 0;						
 		}
 		else	
-			cout<<"Meow7"<<endl;	
+			;
+//			cout<<"Meow7"<<endl;	
 	}
 
-	cout<<"Meow8"<<endl;
+//	cout<<"Meow8"<<endl;
 
 	//These need to work with the vector of vector ints
-//	if(dpllFail(v, matrix))
-//		return 0;
+	if(dpllRecursiveFail(v))
+		return 0;
 
-//	if(dpllSuccess(v, matrix))
-//		return 1;
+	if(dpllRecursiveSuccess(v))
+		return 1;
 
-	int varToChange = -1;
+
+	int varToChange = 0;
+
+/*
 	if(splitVarSelect.empty()){
-//		for(int i = 0; i<=varCount; i++){
-//			cout<<"Element "<<i<<": "<<v[i]<<endl;
-//		}
-		//return 0;
+		for(int i = 0; i<=varCount; i++){
+			cout<<"Element "<<i<<": "<<v[i]<<endl;
+		}
 	}
 	else{
 		varToChange = splitVarSelect.front();
 		cout<<"varToChange: "<<varToChange<<endl;
 		splitVarSelect.pop();
 	}
+*/
 
-	cout<<"Meow9"<<endl;
+	for(int i=1; i<=varCount; i++){
+		if(v[i]==-1){
+			varToChange=i;
+			break;
+		}
+	}
+	
+
+//	cout<<"Meow9"<<endl;
 
 
 	int v2[varCount+1];
-
-	for(int i=0; i<=varCount; i++){
-		cout<<"v["<<i<<"]: "<<v[i]<<endl;
+	for(int i=1; i<=varCount; i++){
+//		cout<<"v["<<i<<"]: "<<v[i]<<endl;
 		v2[i] = v[i];
 	}
 
-	cout<<"Meow10"<<endl;
+//	cout<<"Meow10"<<endl;
 
 
-	if(varToChange!=-1){
-		cout<<"Meow11"<<endl;
+	if(varToChange!=0){
+//		cout<<"Meow11"<<endl;
 
 		v[varToChange]=1;
 		v2[varToChange]=0;
 
-		for(int i=0; i<=varCount; i++){
-			cout<<"2["<<i<<"]: "<<v[i]<<endl;
-			cout<<"v2["<<i<<"]: "<<v2[i]<<endl;
-		}
+//		for(int i=0; i<=varCount; i++){
+//			cout<<"v["<<i<<"]: "<<v[i]<<endl;
+//			cout<<"v2["<<i<<"]: "<<v2[i]<<endl;
+//		}
 
 		return (dpllRecursive(v) || dpllRecursive(v2));
 	}		
 	else{
-					cout<<"Meow12"<<endl;
-
+//		cout<<"Meow12"<<endl;
 		cout<<"No var to change"<<endl;
-		//return 0;
+		return 0;	
 	}
 
-	cout<<"Meow13"<<endl;
+//	cout<<"Meow13"<<endl;
 
+	cout<<"Reached end of recursion"<<endl;
 	return 0;
 }
 
@@ -525,7 +543,7 @@ int DPLL(int vars[], int matrix[][3]){
 			vars[abs(pureLiterals[i])]=0;
 	}
 
-	cout<<"meow"<<endl;
+//	cout<<"meow"<<endl;
 
 	if(dpllFail(vars, matrix))
 		return 0;
@@ -533,7 +551,7 @@ int DPLL(int vars[], int matrix[][3]){
 	if(dpllSuccess(vars, matrix))
 		return 1;
 
-	cout<<"meowok"<<endl;
+//	cout<<"meowok"<<endl;
 	int positiveVar[varCount+1];
 	int totalVar[varCount+1];
 
@@ -542,28 +560,28 @@ int DPLL(int vars[], int matrix[][3]){
 		totalVar[i]=0;
 	}
 
-	cout<<"Meowok2"<<endl;
+//	cout<<"Meowok2"<<endl;
 
 	//populating global vector<vector<int> > allClauses for dpllRecursive to use
 	for(int i=0; i<clauseCount; i++){
 		vector<int> varTriplet;
 
 		for(int j=0; j<3; j++){
-			cout<<"HAHHAAH"<<i<<" "<<j<<endl;
-			cout<<"HAHHAAH"<<matrix[i][j]<<endl;
+//			cout<<"HAHHAAH"<<i<<" "<<j<<endl;
+//			cout<<"HAHHAAH"<<matrix[i][j]<<endl;
 			//varTriplet[j]=matrix[i][j];
 			varTriplet.push_back(matrix[i][j]);
-			cout<<"HAHHAAH"<<i<<" "<<j<<endl;
+//			cout<<"HAHHAAH"<<i<<" "<<j<<endl;
 
 			//Setting positiveVar and totalVar, used to determine order of variable assignment
 			if(matrix[i][j]>0){
-				cout<<"okiiii...."<<endl;
+//				cout<<"okiiii...."<<endl;
 				positiveVar[abs(matrix[i][j])]+=1;
 				totalVar[abs(matrix[i][j])]+=1;
-				cout<<"okiiii...."<<endl;
+//				cout<<"okiiii...."<<endl;
 			}
 			else{
-				cout<<"okiiii...."<<endl;
+//				cout<<"okiiii...."<<endl;
 
 				totalVar[abs(matrix[i][j])]+=1;				
 			}
@@ -571,7 +589,7 @@ int DPLL(int vars[], int matrix[][3]){
 
 		allClauses.push_back(varTriplet);
 	}
-	cout<<"Meowok3"<<endl;
+//	cout<<"Meowok3"<<endl;
 
 	float positiveVarRatio[varCount+1];
 
@@ -582,7 +600,7 @@ int DPLL(int vars[], int matrix[][3]){
 			positiveVarRatio[i] = 1.0*positiveVar[i]/totalVar[i];
 	}	
 
-	cout<<"Meowok4"<<endl;
+//	cout<<"Meowok4"<<endl;
 	int maxVal=-1;
 	int maxIndex=-1;
 	for(int i=0; i<varCount; i++){
@@ -603,8 +621,7 @@ int DPLL(int vars[], int matrix[][3]){
 		maxIndex=-1;
 	}
 
-	cout<<"Meowok5"<<endl;
-
+//	cout<<"Meowok5"<<endl;
 
 	return dpllRecursive(vars);
 
