@@ -29,6 +29,13 @@ run-multiple:
 	./a.out < ./Benchmarks/CNFFormulae/uf50-01.cnf
 	./a.out < ./Benchmarks/CNFFormulae/uf50-02.cnf
 	./a.out < ./Benchmarks/CNFFormulae/uf50-03.cnf
+	./a.out < ./Benchmarks/CNFFormulae/uf50-04.cnf
+	./a.out < ./Benchmarks/CNFFormulae/uf50-05.cnf
+	./a.out < ./Benchmarks/CNFFormulae/uf50-06.cnf
+	./a.out < ./Benchmarks/CNFFormulae/uf50-07.cnf
+	./a.out < ./Benchmarks/CNFFormulae/uf50-08.cnf
+	./a.out < ./Benchmarks/CNFFormulae/uf50-09.cnf
+	./a.out < ./Benchmarks/CNFFormulae/uf50-10.cnf
 
 
 

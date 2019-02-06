@@ -318,9 +318,11 @@ vector<int> pureLiteralCheck(int m[][3]){
 int dpllFail(int v[], int m[][3]){
 	int sign[3];
 
+	/*
 	for(int i=0; i<=varCount; i++){
 		cout<<"Hey var "<< i <<" is "<<v[i]<<endl;
 	}
+	*/
 
 	for(int i=0; i<clauseCount; i++){
 		for(int j=0; j<3; j++){
@@ -434,30 +436,30 @@ int dpllRecursive(int v[]){
 		else if(isFalse(var1, sign1) && isFalse(var2, sign2) && var3==-1){
 			if(allClauses[i][2]>0){
 				v[var3] = 1;
-				cout<<"unitClause A"<<endl;
+				//cout<<"unitClause A"<<endl;
 				}
 			else{
-				cout<<"unitClause B"<<endl;
+				//cout<<"unitClause B"<<endl;
 				v[abs(var3)] = 0;
 			}				
 		}		
 		else if(isFalse(var1, sign1) && var2==-1 && isFalse(var3, sign3)){ 
 			if(allClauses[i][2]>0){
-				cout<<"unitClause C"<<endl;
+				//cout<<"unitClause C"<<endl;
 				v[var2] = 1;
 			}
 			else{
-				cout<<"unitClause D"<<endl;
+				//cout<<"unitClause D"<<endl;
 				v[abs(var2)] = 0;						
 			}	
 		}	
 		else if(var1==-1 && isFalse(var2, sign2) && isFalse(var3, sign3)){ 
 			if(allClauses[i][2]>0){
-				cout<<"unitClause E"<<endl;
+				//cout<<"unitClause E"<<endl;
 				v[var1] = 1;
 			}
 			else{
-				cout<<"unitClause F"<<endl;
+				//cout<<"unitClause F"<<endl;
 				v[abs(var1)] = 0;
 			}						
 		}
@@ -469,11 +471,18 @@ int dpllRecursive(int v[]){
 //	cout<<"Meow8"<<endl;
 
 	//These need to work with the vector of vector ints
-	if(dpllRecursiveFail(v))
+	if(dpllRecursiveFail(v)){
 		return 0;
+	}
 
-	if(dpllRecursiveSuccess(v))
+	if(dpllRecursiveSuccess(v)){
+		cout<<"Successful assignment of variables; formula is satisfiable!"<<endl;
+		for(int i = 1; i<=varCount; i++){
+			cout<<"Var "<<i<<": "<<v[i]<<endl;
+		}
 		return 1;
+
+	}
 
 
 	int varToChange = 0;
@@ -554,7 +563,7 @@ int DPLL(int vars[], int matrix[][3]){
 			vars[abs(pureLiterals[i])]=0;
 	}
 
-//	cout<<"meow"<<endl;
+//	cout<<"Meow"<<endl;
 
 	if(dpllFail(vars, matrix))
 		return 0;
@@ -562,7 +571,8 @@ int DPLL(int vars[], int matrix[][3]){
 	if(dpllSuccess(vars, matrix))
 		return 1;
 
-//	cout<<"meowok"<<endl;
+//	cout<<"Meowok1"<<endl;
+
 	int positiveVar[varCount+1];
 	int totalVar[varCount+1];
 
@@ -578,22 +588,14 @@ int DPLL(int vars[], int matrix[][3]){
 		vector<int> varTriplet;
 
 		for(int j=0; j<3; j++){
-//			cout<<"HAHHAAH"<<i<<" "<<j<<endl;
-//			cout<<"HAHHAAH"<<matrix[i][j]<<endl;
-			//varTriplet[j]=matrix[i][j];
 			varTriplet.push_back(matrix[i][j]);
-//			cout<<"HAHHAAH"<<i<<" "<<j<<endl;
 
 			//Setting positiveVar and totalVar, used to determine order of variable assignment
 			if(matrix[i][j]>0){
-//				cout<<"okiiii...."<<endl;
 				positiveVar[abs(matrix[i][j])]+=1;
 				totalVar[abs(matrix[i][j])]+=1;
-//				cout<<"okiiii...."<<endl;
 			}
 			else{
-//				cout<<"okiiii...."<<endl;
-
 				totalVar[abs(matrix[i][j])]+=1;				
 			}
 		}		
@@ -624,7 +626,7 @@ int DPLL(int vars[], int matrix[][3]){
 		if(maxVal==-1)
 			break;
 		else{
-			cout<<"PUSH INDEX: "<<maxIndex<<endl;
+			//cout<<"PUSH INDEX: "<<maxIndex<<endl;
 			splitVarSelect.push(maxIndex);
 			positiveVarRatio[maxIndex]=-2;
 		}
@@ -729,7 +731,9 @@ int main(){
 
 	int dpllresult;
 	dpllresult = DPLL(vars, clauseMatrix);
-	cout<<"RESULT: "<<dpllresult<<endl;
+	if(!dpllresult)
+		cout<<"DPLL fail; formula unsatisfiable"<<endl;
+	//cout<<"DPLL RESULT: "<<dpllresult<<endl;
 
 /*
 	for(int i=0; i<10; i++){
