@@ -12,9 +12,9 @@ To run:
 	File names starting with "uuf" are unsolvable.
 
 Output:
-	The variable assignment for any satisfiable solutions found.
-	Average time and clauses solved by WalkSat and local search over 10 trials.
-	% of trials for which satisfiable solutions were found.
+	The variable assignment for a satisfiable solution.
+	Average solving time and average clauses solved by WalkSat and local search over 10 trials.
+	% of trials for which satisfiable solutions were found by WalkSat and local search.
 
 Makefile sample commands:
 	make run-#: run a .cnf file with # variables
