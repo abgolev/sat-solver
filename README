@@ -2,7 +2,14 @@ To run:
 	g++ satsolver.cpp
 	./a.out < ./Benchmarks/filename.cnf
 
-	Note:
+	OR
+
+	make 
+	make run-10  (or any of the other options available in the makefile)
+	
+	~
+
+	NOTE:
 	File names starting with "uf" are solvable.
 	File names starting with "uuf" are unsolvable.
 
